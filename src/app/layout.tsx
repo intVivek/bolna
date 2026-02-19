@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "@/store";
+import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "next-themes";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -30,7 +32,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <StoreProvider>{children}</StoreProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          forcedTheme="light"
+        >
+          <StoreProvider>{children}</StoreProvider>
+          <Toaster richColors position="bottom-right" />
+        </ThemeProvider>
       </body>
     </html>
   );
