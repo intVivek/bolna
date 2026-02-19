@@ -24,7 +24,7 @@ export default function FlowChart() {
   }
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full flex-1">
       <Canvas />
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-2">
         <Button onClick={addNode}>
