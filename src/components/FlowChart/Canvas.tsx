@@ -6,6 +6,8 @@ import {
   MiniMap,
   applyNodeChanges,
   useReactFlow,
+  ConnectionMode,
+  MarkerType,
   type NodeChange,
   type EdgeChange,
   type Node as RFNode,
@@ -15,6 +17,14 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useStore, type Node as StoreNode } from "@/store";
+import FlowNode from "./FlowNode";
+
+const nodeTypes = { flowNode: FlowNode };
+
+const defaultEdgeOptions = {
+  type: "step",
+  markerEnd: { type: MarkerType.ArrowClosed },
+};
 
 function toRFNodes(
   storeNodes: StoreNode[],
@@ -22,8 +32,13 @@ function toRFNodes(
 ): RFNode[] {
   return storeNodes.map((node, i) => ({
     id: node.id,
+    type: "flowNode",
     position: { x: 0, y: i * 120 },
-    data: { label: node.id },
+    data: {
+      id: node.id,
+      prompt: node.prompt,
+      isStart: node.id === startNodeId,
+    },
     deletable: node.id !== startNodeId,
   }));
 }
@@ -100,6 +115,18 @@ function CanvasInner() {
     [state.nodes, dispatch]
   );
 
+  const isValidConnection = useCallback(
+    (connection: Connection | RFEdge) => {
+      const { source, target } = connection;
+      if (!source || !target || source === target) return false;
+      // block only if this exact direction already exists
+      return !state.nodes.some(
+        (n) => n.id === source && n.edges.some((e) => e.to_node_id === target)
+      );
+    },
+    [state.nodes]
+  );
+
   const onConnect = useCallback(
     (params: Connection) => {
       const sourceNode = state.nodes.find((n) => n.id === params.source);
@@ -125,6 +152,10 @@ function CanvasInner() {
       <ReactFlow
         nodes={rfNodes}
         edges={rfEdges}
+        nodeTypes={nodeTypes}
+        defaultEdgeOptions={defaultEdgeOptions}
+        connectionMode={ConnectionMode.Loose}
+        isValidConnection={isValidConnection}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={onNodeClick}
