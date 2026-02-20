@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Canvas from "./Canvas";
 import { useStore } from "@/store";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,18 @@ export default function FlowChart() {
   const { state, dispatch } = useStore();
   const selectedNode =
     state.selectedIndex !== null ? state.nodes[state.selectedIndex] : null;
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key !== "Delete" && e.key !== "Backspace") return;
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement).isContentEditable) return;
+      if (state.selectedIndex === null || state.selectedIndex === 0) return;
+      dispatch({ type: "DELETE_NODE", payload: state.selectedIndex });
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [state.selectedIndex, dispatch]);
 
   function addNode() {
     const id = generateId(state.nodes);

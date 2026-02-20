@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useStore } from "@/store";
 import { validateNodes } from "@/lib/validate";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowUpRight } from "lucide-react";
 
 export default function ValidationSummary() {
   const { state, dispatch } = useStore();
@@ -27,7 +27,7 @@ export default function ValidationSummary() {
           return (
             <li key={nodeId}>
               <button
-                className="text-left w-full truncate"
+                className="flex items-center gap-1 mb-[6px] min-w-0 w-full text-left"
                 onClick={() =>
                   dispatch({
                     type: "SELECT_NODE",
@@ -35,9 +35,10 @@ export default function ValidationSummary() {
                   })
                 }
               >
-                <span className="text-xs font-medium text-destructive underline underline-offset-2 cursor-pointer">
+                <span className="text-xs font-medium text-destructive underline underline-offset-2 cursor-pointer truncate">
                   {nodeId || "(empty id)"}
                 </span>
+                <ArrowUpRight className="h-3 w-3 shrink-0 text-destructive opacity-50" />
               </button>
               <ul className="mt-0.5 pl-2 flex flex-col gap-0.5">
                 {messages.map((msg) => (

@@ -189,7 +189,12 @@ function CanvasInner() {
         onConnect={onConnect}
         fitView
       >
-        <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#d1d5db" />
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={20}
+          size={1}
+          color="#d1d5db"
+        />
         <MiniMap zoomable pannable />
       </ReactFlow>
     </div>

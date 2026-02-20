@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useStore } from "@/store";
 import { validateWarnings } from "@/lib/validate";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, ArrowUpRight } from "lucide-react";
 
 export default function WarningSummary() {
   const { state, dispatch } = useStore();
@@ -28,7 +28,7 @@ export default function WarningSummary() {
           return (
             <li key={nodeId}>
               <button
-                className="text-left w-full truncate"
+                className="flex items-center gap-1 mb-[6px] min-w-0 w-full text-left"
                 onClick={() =>
                   dispatch({
                     type: "SELECT_NODE",
@@ -36,9 +36,10 @@ export default function WarningSummary() {
                   })
                 }
               >
-                <span className="text-xs font-medium text-amber-700 underline underline-offset-2 cursor-pointer">
+                <span className="text-xs font-medium text-amber-700 underline underline-offset-2 cursor-pointer truncate">
                   {nodeId || "(empty id)"}
                 </span>
+                <ArrowUpRight className="h-3 w-3 shrink-0 text-amber-700 opacity-50" />
               </button>
               <ul className="mt-0.5 pl-2 flex flex-col gap-0.5">
                 {messages.map((msg) => (
