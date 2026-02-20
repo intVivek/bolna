@@ -20,15 +20,8 @@ type Action =
 
 export type { Action };
 
-const initialState: StoreState = {
-  nodes: [
-    {
-      id: "node-1",
-      description: "node-1",
-      prompt: "",
-      edges: [],
-    },
-  ],
+const defaultState: StoreState = {
+  nodes: [{ id: "node-1", description: "Start node", prompt: "", edges: [] }],
   selectedIndex: 0,
 };
 
@@ -123,7 +116,7 @@ export function StoreProvider({
 }: {
   children: ReactNode;
 }): JSX.Element {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, defaultState);
 
   return (
     <StoreContext.Provider value={{ state, dispatch }}>

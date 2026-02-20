@@ -7,11 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Copy, Check, ArrowLeft } from "lucide-react";
 
 function buildJson(nodes: ReturnType<typeof useStore>["state"]["nodes"]) {
-  return JSON.stringify(
-    { startNodeId: nodes[0]?.id ?? null, nodes },
-    null,
-    2
-  );
+  return JSON.stringify({ startNodeId: nodes[0]?.id ?? null, nodes }, null, 2);
 }
 
 export default function Header() {

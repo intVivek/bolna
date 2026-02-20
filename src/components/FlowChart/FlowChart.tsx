@@ -29,7 +29,7 @@ export default function FlowChart() {
 
   return (
     <div className="relative h-full flex-1">
-      <div className="fixed top-4 right-4 z-10 flex flex-col gap-2">
+      <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
         <ValidationSummary />
         <WarningSummary />
       </div>
