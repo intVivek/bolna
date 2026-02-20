@@ -115,6 +115,10 @@
     --radius-4xl: calc(var(--radius) + 16px);
 }
 
+.cm-focused {
+  outline: none !important;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
