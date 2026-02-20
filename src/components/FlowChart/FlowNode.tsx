@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { AlertCircle, AlertTriangle } from "lucide-react";
+import { Badge } from "../ui/badge";
 
 export interface FlowNodeData extends Record<string, unknown> {
   id: string;
@@ -19,41 +20,50 @@ export default function FlowNode({ data }: NodeProps) {
     <div
       className={cn(
         "min-w-[160px] max-w-[220px] rounded-lg border bg-white overflow-hidden",
-        isSelected
-          ? "border-primary ring-2 ring-primary/20"
-          : hasError
-          ? "border-destructive/60"
-          : hasWarning
-          ? "border-amber-400/70"
-          : "border-border"
+        isSelected && "ring-2 ring-primary/20",
+        hasWarning && "border-amber-400/70",
+        hasError && "border-destructive/60",
+        isStart && "bg-primary/40"
       )}
     >
-      <div
-        className={cn(
-          "px-3 py-2.5 flex flex-col gap-1",
-          isStart ? "bg-emerald-400" : ""
-        )}
-      >
-        <div className="flex items-center justify-between gap-1">
-          <span className="text-xs font-semibold text-foreground truncate">
+      <div className={cn("px-3 py-2.5 flex gap-1")}>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs flex items-center gap-1 font-semibold text-foreground truncate">
             {id}
           </span>
-          {hasError && (
-            <AlertCircle className="h-3 w-3 shrink-0 text-destructive" />
-          )}
-          {!hasError && hasWarning && (
-            <AlertTriangle className="h-3 w-3 shrink-0 text-amber-500" />
+          {prompt && (
+            <Badge
+              variant="secondary"
+              className="text-[8px] py-[2px] h-max line-clamp-2 leading-snug"
+            >
+              {prompt}vivek
+            </Badge>
           )}
         </div>
-        {prompt && (
-          <span className="text-[11px] text-muted-foreground line-clamp-2 leading-snug">
-            {prompt}
-          </span>
-        )}
+        <div className="flex items-center justify-between ml-auto gap-1">
+          <div className="flex items-center gap-1">
+            {hasWarning && (
+              <AlertTriangle className="h-3 w-3 shrink-0 text-amber-500" />
+            )}
+            {hasError && (
+              <AlertCircle className="h-3 w-3 shrink-0 text-destructive" />
+            )}
+          </div>
+        </div>
       </div>
 
-      {!isStart && <Handle type="target" position={Position.Top} />}
-      <Handle type="source" position={Position.Bottom} />
+      <Handle
+        id="target"
+        type="target"
+        position={Position.Top}
+        className="w-3! h-[6px]! rounded-[2px]! bg-muted-foreground! border-0!"
+      />
+      <Handle
+        id="source"
+        type="source"
+        position={Position.Bottom}
+        className="w-[6px]! h-[6px]! rounded-full! bg-primary! border-0!"
+      />
     </div>
   );
 }

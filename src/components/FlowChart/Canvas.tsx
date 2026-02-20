@@ -4,9 +4,10 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import {
   ReactFlow,
   MiniMap,
+  Background,
+  BackgroundVariant,
   applyNodeChanges,
   useReactFlow,
-  ConnectionMode,
   MarkerType,
   type NodeChange,
   type EdgeChange,
@@ -18,13 +19,17 @@ import {
 import "@xyflow/react/dist/style.css";
 import { useStore, type Node as StoreNode } from "@/store";
 import FlowNode from "./FlowNode";
+import ConnectionLine from "./ConnectionLine";
 import { validateNodes, validateWarnings } from "@/lib/validate";
 
 const nodeTypes = { flowNode: FlowNode };
 
+const EDGE_COLOR = "#6b7280";
+
 const defaultEdgeOptions = {
-  type: "step",
-  markerEnd: { type: MarkerType.ArrowClosed },
+  type: "smoothstep",
+  style: { stroke: EDGE_COLOR, strokeWidth: 0.75 },
+  markerEnd: { type: MarkerType.ArrowClosed, color: EDGE_COLOR },
 };
 
 function toRFNodes(
@@ -58,6 +63,8 @@ function toRFEdges(storeNodes: StoreNode[]): RFEdge[] {
         id: `${i}->${tgtIdx}`,
         source: String(i),
         target: tgtIdx,
+        sourceHandle: "source",
+        targetHandle: "target",
         label: edge.condition,
       };
     })
@@ -165,13 +172,13 @@ function CanvasInner() {
   );
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full bg-[#f8f8f8]">
       <ReactFlow
         nodes={rfNodes}
         edges={rfEdges}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
-        connectionMode={ConnectionMode.Loose}
+        connectionLineComponent={ConnectionLine}
         isValidConnection={isValidConnection}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
@@ -179,6 +186,7 @@ function CanvasInner() {
         onConnect={onConnect}
         fitView
       >
+        <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#d1d5db" />
         <MiniMap zoomable pannable />
       </ReactFlow>
     </div>
