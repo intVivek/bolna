@@ -1,10 +1,19 @@
 "use client";
 
-import { createContext, useContext, useReducer, ReactNode, JSX } from "react";
+import {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  ReactNode,
+  JSX,
+} from "react";
 import type { Node } from "./types";
 
 export type { Node };
 export type { Edge } from "./types";
+
+const STORAGE_KEY = "flow_nodes";
 
 interface StoreState {
   nodes: Node[];
@@ -24,6 +33,23 @@ const defaultState: StoreState = {
   nodes: [{ id: "node-1", description: "Start node", prompt: "", edges: [] }],
   selectedIndex: 0,
 };
+
+function getInitialState(): StoreState {
+  if (typeof window === "undefined") return defaultState;
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const nodes = JSON.parse(stored);
+      if (Array.isArray(nodes) && nodes.length > 0)
+        return { nodes, selectedIndex: 0 };
+    }
+  } catch {}
+  return defaultState;
+}
+
+export function clearPersistedNodes() {
+  if (typeof window !== "undefined") localStorage.removeItem(STORAGE_KEY);
+}
 
 function reducer(state: StoreState, action: Action): StoreState {
   switch (action.type) {
@@ -116,7 +142,12 @@ export function StoreProvider({
 }: {
   children: ReactNode;
 }): JSX.Element {
-  const [state, dispatch] = useReducer(reducer, defaultState);
+  const [state, dispatch] = useReducer(reducer, undefined, getInitialState);
+
+  // Persist on every nodes change
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.nodes));
+  }, [state.nodes]);
 
   return (
     <StoreContext.Provider value={{ state, dispatch }}>
