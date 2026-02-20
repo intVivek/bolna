@@ -35,7 +35,7 @@ export default function Header() {
   return (
     <div className="h-[60px] flex items-center justify-between border-b px-4">
       <div className="flex items-center gap-3">
-        <Link href="/">
+        <Link prefetch={true} href="/">
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <ArrowLeft className="h-4 w-4" />
           </Button>

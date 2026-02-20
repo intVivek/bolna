@@ -58,6 +58,10 @@ export default function FlowStartOptions() {
     } catch {}
   }, []);
 
+  useEffect(() => {
+    router.prefetch("/dashboard");
+  }, [router]);
+
   function navigate() {
     router.push("/dashboard");
   }
