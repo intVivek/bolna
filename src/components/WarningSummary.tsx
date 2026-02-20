@@ -2,27 +2,31 @@
 
 import { useMemo } from "react";
 import { useStore } from "@/store";
-import { validateNodes } from "@/lib/validate";
-import { AlertCircle } from "lucide-react";
+import { validateWarnings } from "@/lib/validate";
+import { AlertTriangle } from "lucide-react";
 
-export default function ValidationSummary() {
+export default function WarningSummary() {
   const { state, dispatch } = useStore();
 
-  const errors = useMemo(() => validateNodes(state.nodes), [state.nodes]);
+  const warnings = useMemo(
+    () => validateWarnings(state.nodes),
+    [state.nodes]
+  );
 
-  if (errors.length === 0) return null;
+  if (warnings.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-destructive/40 bg-destructive/5 p-3">
-      <div className="flex items-center gap-1.5 text-destructive">
-        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+    <div className="flex flex-col gap-2 rounded-md border border-amber-400/50 bg-amber-50 p-3">
+      <div className="flex items-center gap-1.5 text-amber-600">
+        <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
         <span className="text-xs font-semibold">
-          {errors.length} node{errors.length > 1 ? "s have" : " has"} errors
+          {warnings.length} node{warnings.length > 1 ? "s are" : " is"}{" "}
+          disconnected
         </span>
       </div>
 
       <ul className="flex flex-col gap-2">
-        {errors.map(({ nodeId, messages }) => {
+        {warnings.map(({ nodeId, messages }) => {
           const idx = state.nodes.findIndex((n) => n.id === nodeId);
           return (
             <li key={nodeId}>
@@ -35,13 +39,13 @@ export default function ValidationSummary() {
                   })
                 }
               >
-                <span className="text-xs font-medium text-destructive underline underline-offset-2 cursor-pointer">
+                <span className="text-xs font-medium text-amber-700 underline underline-offset-2 cursor-pointer">
                   {nodeId || "(empty id)"}
                 </span>
               </button>
               <ul className="mt-0.5 pl-2 flex flex-col gap-0.5">
                 {messages.map((msg) => (
-                  <li key={msg} className="text-xs text-destructive/80">
+                  <li key={msg} className="text-xs text-amber-600/80">
                     · {msg}
                   </li>
                 ))}

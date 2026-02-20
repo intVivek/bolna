@@ -18,7 +18,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import { useStore, type Node as StoreNode } from "@/store";
 import FlowNode from "./FlowNode";
-import { validateNodes } from "@/lib/validate";
+import { validateNodes, validateWarnings } from "@/lib/validate";
 
 const nodeTypes = { flowNode: FlowNode };
 
@@ -32,6 +32,7 @@ function toRFNodes(
   selectedIndex: number | null
 ): RFNode[] {
   const errorIds = new Set(validateNodes(storeNodes).map((e) => e.nodeId));
+  const warnIds = new Set(validateWarnings(storeNodes).map((w) => w.nodeId));
   return storeNodes.map((node, i) => ({
     id: String(i),
     type: "flowNode",
@@ -42,6 +43,7 @@ function toRFNodes(
       isStart: i === 0,
       isSelected: i === selectedIndex,
       hasError: errorIds.has(node.id),
+      hasWarning: warnIds.has(node.id),
     },
     deletable: i !== 0,
   }));
