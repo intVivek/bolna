@@ -18,6 +18,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import { useStore, type Node as StoreNode } from "@/store";
 import FlowNode from "./FlowNode";
+import { validateNodes } from "@/lib/validate";
 
 const nodeTypes = { flowNode: FlowNode };
 
@@ -28,29 +29,36 @@ const defaultEdgeOptions = {
 
 function toRFNodes(
   storeNodes: StoreNode[],
-  startNodeId: string | null
+  selectedIndex: number | null
 ): RFNode[] {
+  const errorIds = new Set(validateNodes(storeNodes).map((e) => e.nodeId));
   return storeNodes.map((node, i) => ({
-    id: node.id,
+    id: String(i),
     type: "flowNode",
     position: { x: 0, y: i * 120 },
     data: {
       id: node.id,
       prompt: node.prompt,
-      isStart: node.id === startNodeId,
+      isStart: i === 0,
+      isSelected: i === selectedIndex,
+      hasError: errorIds.has(node.id),
     },
-    deletable: node.id !== startNodeId,
+    deletable: i !== 0,
   }));
 }
 
 function toRFEdges(storeNodes: StoreNode[]): RFEdge[] {
-  return storeNodes.flatMap((node) =>
-    node.edges.map((edge) => ({
-      id: `${node.id}->${edge.to_node_id}`,
-      source: node.id,
-      target: edge.to_node_id,
-      label: edge.condition,
-    }))
+  const idToIdx = new Map(storeNodes.map((n, i) => [n.id, String(i)]));
+  return storeNodes.flatMap((node, i) =>
+    node.edges.map((edge) => {
+      const tgtIdx = idToIdx.get(edge.to_node_id) ?? edge.to_node_id;
+      return {
+        id: `${i}->${tgtIdx}`,
+        source: String(i),
+        target: tgtIdx,
+        label: edge.condition,
+      };
+    })
   );
 }
 
@@ -59,22 +67,20 @@ function CanvasInner() {
   const { fitView } = useReactFlow();
 
   const [rfNodes, setRFNodes] = useState<RFNode[]>(() =>
-    toRFNodes(state.nodes, state.startNodeId)
+    toRFNodes(state.nodes, state.selectedIndex)
   );
 
-  // Sync store node additions/removals while preserving drag positions
   useEffect(() => {
     setRFNodes((prev) => {
       const posMap = new Map(prev.map((n) => [n.id, n.position]));
-      return toRFNodes(state.nodes, state.startNodeId).map((node) => ({
+      return toRFNodes(state.nodes, state.selectedIndex).map((node) => ({
         ...node,
         position: posMap.get(node.id) ?? node.position,
       }));
     });
     fitView({ padding: 0.2, duration: 300 });
-  }, [state.nodes, state.startNodeId, fitView]);
+  }, [state.nodes, state.selectedIndex, fitView]);
 
-  // Edges are fully derived — no local state needed
   const rfEdges = useMemo(() => toRFEdges(state.nodes), [state.nodes]);
 
   const onNodesChange = useCallback(
@@ -82,35 +88,41 @@ function CanvasInner() {
       setRFNodes((prev) => applyNodeChanges(changes, prev));
       changes
         .filter((c) => c.type === "remove")
-        .forEach((c) => dispatch({ type: "DELETE_NODE", payload: c.id }));
+        .forEach((c) =>
+          dispatch({ type: "DELETE_NODE", payload: parseInt(c.id) })
+        );
     },
     [dispatch]
   );
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: RFNode) => {
-      dispatch({ type: "SELECT_NODE", payload: node.id });
+      dispatch({ type: "SELECT_NODE", payload: parseInt(node.id) });
     },
     [dispatch]
   );
 
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
-      const removals = changes.filter((c) => c.type === "remove");
-      for (const change of removals) {
-        const [source, target] = change.id.split("->");
-        const sourceNode = state.nodes.find((n) => n.id === source);
-        if (!sourceNode) continue;
-        dispatch({
-          type: "UPDATE_NODE",
-          payload: {
-            id: source,
-            patch: {
-              edges: sourceNode.edges.filter((e) => e.to_node_id !== target),
+      changes
+        .filter((c) => c.type === "remove")
+        .forEach((change) => {
+          const [srcIdx, tgtIdx] = change.id.split("->").map(Number);
+          const sourceNode = state.nodes[srcIdx];
+          const targetNode = state.nodes[tgtIdx];
+          if (!sourceNode || !targetNode) return;
+          dispatch({
+            type: "UPDATE_NODE",
+            payload: {
+              index: srcIdx,
+              patch: {
+                edges: sourceNode.edges.filter(
+                  (e) => e.to_node_id !== targetNode.id
+                ),
+              },
             },
-          },
+          });
         });
-      }
     },
     [state.nodes, dispatch]
   );
@@ -119,26 +131,29 @@ function CanvasInner() {
     (connection: Connection | RFEdge) => {
       const { source, target } = connection;
       if (!source || !target || source === target) return false;
-      // block only if this exact direction already exists
-      return !state.nodes.some(
-        (n) => n.id === source && n.edges.some((e) => e.to_node_id === target)
-      );
+      const sourceNode = state.nodes[parseInt(source)];
+      const targetNode = state.nodes[parseInt(target)];
+      if (!sourceNode || !targetNode) return false;
+      return !sourceNode.edges.some((e) => e.to_node_id === targetNode.id);
     },
     [state.nodes]
   );
 
   const onConnect = useCallback(
     (params: Connection) => {
-      const sourceNode = state.nodes.find((n) => n.id === params.source);
-      if (!sourceNode) return;
+      const srcIdx = parseInt(params.source!);
+      const tgtIdx = parseInt(params.target!);
+      const sourceNode = state.nodes[srcIdx];
+      const targetNode = state.nodes[tgtIdx];
+      if (!sourceNode || !targetNode) return;
       dispatch({
         type: "UPDATE_NODE",
         payload: {
-          id: sourceNode.id,
+          index: srcIdx,
           patch: {
             edges: [
               ...sourceNode.edges,
-              { to_node_id: params.target!, condition: "" },
+              { to_node_id: targetNode.id, condition: "" },
             ],
           },
         },

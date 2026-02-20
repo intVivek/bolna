@@ -17,23 +17,21 @@ import AddEdgeModal from "./AddEdgeModal";
 
 export default function EdgeEditor() {
   const { state, dispatch } = useStore();
-  const { selectedNodeId } = state;
-  const selectedNode = state.nodes.find((n) => n.id === selectedNodeId);
+  const selectedNode =
+    state.selectedIndex !== null ? state.nodes[state.selectedIndex] : null;
 
   const [open, setOpen] = useState(false);
 
   if (!selectedNode) return null;
 
-  const otherNodes = state.nodes.filter((n) => n.id !== selectedNodeId);
-  const existingTargetIds = new Set(
-    selectedNode.edges.map((e) => e.to_node_id)
-  );
+  const otherNodes = state.nodes.filter((n) => n.id !== selectedNode.id);
+  const existingTargetIds = new Set(selectedNode.edges.map((e) => e.to_node_id));
   const availableNodes = otherNodes.filter((n) => !existingTargetIds.has(n.id));
 
   function updateEdges(edges: Edge[]) {
     dispatch({
       type: "UPDATE_NODE",
-      payload: { id: selectedNodeId!, patch: { edges } },
+      payload: { index: state.selectedIndex!, patch: { edges } },
     });
   }
 
@@ -76,13 +74,10 @@ export default function EdgeEditor() {
       </div>
 
       {selectedNode.edges.length === 0 && (
-        <p className="text-xs text-muted-foreground italic">
-          No outgoing edges
-        </p>
+        <p className="text-xs text-muted-foreground italic">No outgoing edges</p>
       )}
 
       {selectedNode.edges.map((edge, i) => {
-        // For this row, show nodes not already targeted by OTHER edges + always include this edge's own target
         const rowAvailableNodes = otherNodes.filter(
           (n) => n.id === edge.to_node_id || !existingTargetIds.has(n.id)
         );
@@ -116,7 +111,7 @@ export default function EdgeEditor() {
             </div>
             <Input
               className="h-8 text-xs"
-              placeholder="Condition…"
+              placeholder="Condition (optional)…"
               value={edge.condition}
               onChange={(e) => updateEdge(i, { condition: e.target.value })}
             />

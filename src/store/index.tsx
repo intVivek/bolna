@@ -8,89 +8,103 @@ export type { Edge } from "./types";
 
 interface StoreState {
   nodes: Node[];
-  selectedNodeId: string | null;
-  startNodeId: string | null;
+  selectedIndex: number | null;
 }
 
 type Action =
   | { type: "SET_NODES"; payload: Node[] }
   | { type: "ADD_NODE"; payload: Node }
-  | { type: "DELETE_NODE"; payload: string }
-  | { type: "UPDATE_NODE"; payload: { id: string; patch: Partial<Node> } }
-  | { type: "SELECT_NODE"; payload: string | null }
-  | { type: "SET_START_NODE"; payload: string | null };
+  | { type: "DELETE_NODE"; payload: number }
+  | { type: "UPDATE_NODE"; payload: { index: number; patch: Partial<Node> } }
+  | { type: "SELECT_NODE"; payload: number | null };
 
 export type { Action };
 
 const initialState: StoreState = {
-  nodes: [],
-  selectedNodeId: null,
-  startNodeId: null,
+  nodes: [
+    {
+      id: "node-1",
+      description: "node-1",
+      prompt: "",
+      edges: [],
+    },
+  ],
+  selectedIndex: 0,
 };
 
 function reducer(state: StoreState, action: Action): StoreState {
   switch (action.type) {
-    case "SET_NODES":
-      return { ...state, nodes: action.payload };
+    case "SET_NODES": {
+      const newNodes = action.payload;
+      const selected =
+        state.selectedIndex !== null && state.selectedIndex < newNodes.length
+          ? state.selectedIndex
+          : newNodes.length > 0
+          ? 0
+          : null;
+      return { ...state, nodes: newNodes, selectedIndex: selected };
+    }
 
     case "ADD_NODE": {
-      const isFirst = state.nodes.length === 0;
-      return {
-        ...state,
-        nodes: [...state.nodes, action.payload],
-        startNodeId: isFirst ? action.payload.id : state.startNodeId,
-      };
+      const newNodes = [...state.nodes, action.payload];
+      return { ...state, nodes: newNodes, selectedIndex: newNodes.length - 1 };
     }
 
     case "DELETE_NODE": {
-      const id = action.payload;
-      return {
-        ...state,
-        nodes: state.nodes
-          .filter((n) => n.id !== id)
-          .map((n) => ({
-            ...n,
-            edges: n.edges.filter((e) => e.to_node_id !== id),
-          })),
-        selectedNodeId:
-          state.selectedNodeId === id ? null : state.selectedNodeId,
-        startNodeId: state.startNodeId === id ? null : state.startNodeId,
-      };
+      const idx = action.payload;
+      const deletedId = state.nodes[idx]?.id;
+      const newNodes = state.nodes
+        .filter((_, i) => i !== idx)
+        .map((n) => ({
+          ...n,
+          edges: n.edges.filter((e) => e.to_node_id !== deletedId),
+        }));
+
+      let newSelected: number | null;
+      if (newNodes.length === 0) {
+        newSelected = null;
+      } else if (state.selectedIndex === idx) {
+        newSelected = 0;
+      } else if (state.selectedIndex !== null && state.selectedIndex > idx) {
+        newSelected = state.selectedIndex - 1;
+      } else {
+        newSelected = state.selectedIndex;
+      }
+
+      return { ...state, nodes: newNodes, selectedIndex: newSelected };
     }
 
     case "UPDATE_NODE": {
-      const { id, patch } = action.payload;
+      const { index, patch } = action.payload;
+      const target = state.nodes[index];
+      if (!target) return state;
+
+      const oldId = target.id;
       const newId = patch.id;
 
-      let nodes = state.nodes.map((n) =>
-        n.id === id ? { ...n, ...patch } : n
+      let nodes = state.nodes.map((n, i) =>
+        i === index ? { ...n, ...patch } : n
       );
 
-      if (newId && newId !== id) {
-        nodes = nodes.map((n) => ({
-          ...n,
-          edges: n.edges.map((e) => ({
-            ...e,
-            to_node_id: e.to_node_id === id ? newId : e.to_node_id,
-          })),
-        }));
+      if (newId !== undefined && newId !== oldId) {
+        nodes = nodes.map((n, i) =>
+          i === index
+            ? n
+            : {
+                ...n,
+                edges: n.edges.map((e) => ({
+                  ...e,
+                  to_node_id: e.to_node_id === oldId ? newId : e.to_node_id,
+                })),
+              }
+        );
       }
 
-      return {
-        ...state,
-        nodes,
-        selectedNodeId:
-          newId && state.selectedNodeId === id ? newId : state.selectedNodeId,
-        startNodeId:
-          newId && state.startNodeId === id ? newId : state.startNodeId,
-      };
+      return { ...state, nodes };
     }
 
     case "SELECT_NODE":
-      return { ...state, selectedNodeId: action.payload };
-
-    case "SET_START_NODE":
-      return { ...state, startNodeId: action.payload };
+      return { ...state, selectedIndex: action.payload };
 
     default:
       return state;

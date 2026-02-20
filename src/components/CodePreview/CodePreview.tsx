@@ -7,7 +7,6 @@ import { githubLight } from "@uiw/codemirror-theme-github";
 import { useStore } from "@/store";
 import type { Node } from "@/store";
 import { Copy, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 function toJson(startNodeId: string | null, nodes: Node[]) {
   return JSON.stringify({ startNodeId, nodes }, null, 2);
@@ -17,9 +16,11 @@ export default function CodePreview() {
   const { state } = useStore();
   const [copied, setCopied] = useState(false);
 
+  const startNodeId = state.nodes[0]?.id ?? null;
+
   const storeJson = useMemo(
-    () => toJson(state.startNodeId, state.nodes),
-    [state.startNodeId, state.nodes]
+    () => toJson(startNodeId, state.nodes),
+    [startNodeId, state.nodes]
   );
 
   function handleCopy() {
@@ -36,7 +37,7 @@ export default function CodePreview() {
       </div>
       <div className="h-max max-h-[300px] w-full mt-2 flex flex-col text-sm border rounded-lg overflow-hidden relative group">
         <div
-          className="absolute top-2 right-2 z-10 h-8 w-8 flex items-center justify-center border rounded-md"
+          className="absolute top-2 right-2 z-10 h-8 w-8 flex items-center justify-center border rounded-md cursor-pointer bg-background"
           onClick={handleCopy}
         >
           {copied ? (

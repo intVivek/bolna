@@ -1,20 +1,24 @@
 import { cn } from "@/lib/utils";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { AlertCircle } from "lucide-react";
 
 export interface FlowNodeData extends Record<string, unknown> {
   id: string;
   prompt: string;
   isStart: boolean;
+  isSelected: boolean;
+  hasError: boolean;
 }
 
-export default function FlowNode({ data, selected }: NodeProps) {
-  const { id, prompt, isStart } = data as FlowNodeData;
+export default function FlowNode({ data }: NodeProps) {
+  const { id, prompt, isStart, isSelected, hasError } = data as FlowNodeData;
 
   return (
     <div
       className={cn(
         "min-w-[160px] max-w-[220px] rounded-lg border bg-white overflow-hidden",
-        selected ? "border-primary/50" : "border-border"
+        isSelected ? "border-primary ring-2 ring-primary/20" : "border-border",
+        hasError && !isSelected && "border-destructive/60"
       )}
     >
       <div
@@ -23,9 +27,14 @@ export default function FlowNode({ data, selected }: NodeProps) {
           isStart ? "bg-emerald-400" : ""
         )}
       >
-        <span className="text-xs font-semibold text-foreground truncate">
-          {id}
-        </span>
+        <div className="flex items-center justify-between gap-1">
+          <span className="text-xs font-semibold text-foreground truncate">
+            {id}
+          </span>
+          {hasError && (
+            <AlertCircle className="h-3 w-3 shrink-0 text-destructive" />
+          )}
+        </div>
         {prompt && (
           <span className="text-[11px] text-muted-foreground line-clamp-2 leading-snug">
             {prompt}
