@@ -62,8 +62,13 @@ export default function FlowStartOptions() {
     router.prefetch("/dashboard");
   }, [router]);
 
-  function navigate() {
-    router.push("/dashboard");
+  function navigate(nodes?: Node[]) {
+    if (nodes) {
+      localStorage.setItem("flow_nodes", JSON.stringify(nodes));
+      window.location.href = "/dashboard";
+    } else {
+      router.push("/dashboard");
+    }
   }
 
   function tryLoad(raw: string) {
@@ -74,7 +79,7 @@ export default function FlowStartOptions() {
     if (result.validationErrors.length > 0) {
       setPending(result);
     } else {
-      navigate();
+      navigate(result.nodes);
     }
   }
 
@@ -98,7 +103,7 @@ export default function FlowStartOptions() {
       {hasSaved && (
         <>
           <button
-            onClick={navigate}
+            onClick={() => navigate()}
             className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-left hover:border-primary hover:bg-primary/10 transition-colors"
           >
             <History className="h-5 w-5 shrink-0 text-primary" />
@@ -247,7 +252,7 @@ export default function FlowStartOptions() {
             >
               Go back
             </Button>
-            <Button size="sm" onClick={navigate}>
+            <Button size="sm" onClick={() => navigate(pending!.nodes)}>
               Load anyway
             </Button>
           </div>
