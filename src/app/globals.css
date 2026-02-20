@@ -119,6 +119,10 @@
   outline: none !important;
 }
 
+.cm-editor, .cm-scroller {
+  background: #f8f8f8 !important;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

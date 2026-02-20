@@ -13,10 +13,10 @@ export default function WarningSummary() {
   if (warnings.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-amber-400/50 bg-amber-50/50 p-3">
+    <div className="flex flex-col gap-2 max-w-[300px] rounded-md border border-amber-400/50 bg-amber-50/50 p-3">
       <div className="flex items-center gap-1.5 text-amber-600">
         <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-        <span className="text-xs font-semibold">
+        <span className="text-xs truncate font-semibold">
           {warnings.length} node{warnings.length > 1 ? "s are" : " is"}{" "}
           disconnected
         </span>
@@ -28,7 +28,7 @@ export default function WarningSummary() {
           return (
             <li key={nodeId}>
               <button
-                className="text-left w-full"
+                className="text-left w-full truncate"
                 onClick={() =>
                   dispatch({
                     type: "SELECT_NODE",

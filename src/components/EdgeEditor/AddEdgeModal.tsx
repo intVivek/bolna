@@ -18,6 +18,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 interface AddEdgeModalProps {
   open: boolean;
@@ -76,7 +77,10 @@ export default function AddEdgeModal({
               }}
             >
               <SelectTrigger
-                className={errors.to_node_id ? "border-destructive" : ""}
+                className={cn(
+                  "max-w-[220px]",
+                  errors.to_node_id ? "border-destructive" : ""
+                )}
               >
                 <SelectValue placeholder="Pick a target node…" />
               </SelectTrigger>

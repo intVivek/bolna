@@ -34,6 +34,13 @@ export default function NodeEditor() {
     });
   }
 
+  function patchPrompt(value: string) {
+    dispatch({
+      type: "UPDATE_NODE",
+      payload: { index: state.selectedIndex!, patch: { prompt: value } },
+    });
+  }
+
   return (
     <div className="flex flex-col gap-4 mt-4">
       <div className="flex flex-col gap-1">
@@ -69,6 +76,21 @@ export default function NodeEditor() {
         {descriptionError && (
           <p className="text-xs text-destructive">{descriptionError}</p>
         )}
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Prompt
+          </label>
+          <span className="text-[10px] text-muted-foreground">optional</span>
+        </div>
+        <textarea
+          className="rounded-md border border-input px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring resize-none min-h-[80px] bg-background"
+          value={selectedNode.prompt ?? ""}
+          onChange={(e) => patchPrompt(e.target.value)}
+          placeholder="Enter a prompt…"
+        />
       </div>
     </div>
   );

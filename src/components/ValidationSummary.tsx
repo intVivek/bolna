@@ -13,10 +13,10 @@ export default function ValidationSummary() {
   if (errors.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-destructive/40 bg-destructive/5 p-3">
+    <div className="flex flex-col gap-2 max-w-[300px] rounded-md border border-destructive/40 bg-destructive/5 p-3">
       <div className="flex items-center gap-1.5 text-destructive">
         <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-        <span className="text-xs font-semibold">
+        <span className="text-xs truncate font-semibold">
           {errors.length} node{errors.length > 1 ? "s have" : " has"} errors
         </span>
       </div>
@@ -27,7 +27,7 @@ export default function ValidationSummary() {
           return (
             <li key={nodeId}>
               <button
-                className="text-left w-full"
+                className="text-left w-full truncate"
                 onClick={() =>
                   dispatch({
                     type: "SELECT_NODE",

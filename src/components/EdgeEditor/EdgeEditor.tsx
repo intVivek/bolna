@@ -25,7 +25,9 @@ export default function EdgeEditor() {
   if (!selectedNode) return null;
 
   const otherNodes = state.nodes.filter((n) => n.id !== selectedNode.id);
-  const existingTargetIds = new Set(selectedNode.edges.map((e) => e.to_node_id));
+  const existingTargetIds = new Set(
+    selectedNode.edges.map((e) => e.to_node_id)
+  );
   const availableNodes = otherNodes.filter((n) => !existingTargetIds.has(n.id));
 
   function updateEdges(edges: Edge[]) {
@@ -74,7 +76,9 @@ export default function EdgeEditor() {
       </div>
 
       {selectedNode.edges.length === 0 && (
-        <p className="text-xs text-muted-foreground italic">No outgoing edges</p>
+        <p className="text-xs text-muted-foreground italic">
+          No outgoing edges
+        </p>
       )}
 
       {selectedNode.edges.map((edge, i) => {
@@ -85,36 +89,46 @@ export default function EdgeEditor() {
         return (
           <div key={i} className="flex flex-col gap-2 rounded-md border p-3">
             <div className="flex items-center gap-2">
-              <Select
-                value={edge.to_node_id}
-                onValueChange={(val) => updateEdge(i, { to_node_id: val })}
-              >
-                <SelectTrigger className="flex-1 h-8 text-xs">
-                  <SelectValue placeholder="Target node…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {rowAvailableNodes.map((n) => (
-                    <SelectItem key={n.id} value={n.id}>
-                      {n.id}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex flex-col gap-1 flex-1 min-w-0">
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                  Target
+                </span>
+                <Select
+                  value={edge.to_node_id}
+                  onValueChange={(val) => updateEdge(i, { to_node_id: val })}
+                >
+                  <SelectTrigger className="h-8 text-xs w-full">
+                    <SelectValue placeholder="Target node…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {rowAvailableNodes.map((n) => (
+                      <SelectItem key={n.id} value={n.id}>
+                        {n.id}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8 shrink-0 text-destructive hover:text-destructive"
+                className="h-8 mt-4 w-8 shrink-0 text-destructive hover:text-destructive"
                 onClick={() => removeEdge(i)}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
-            <Input
-              className="h-8 text-xs"
-              placeholder="Condition (optional)…"
-              value={edge.condition}
-              onChange={(e) => updateEdge(i, { condition: e.target.value })}
-            />
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                Condition
+              </span>
+              <Input
+                className="h-8 text-xs"
+                placeholder="Optional…"
+                value={edge.condition}
+                onChange={(e) => updateEdge(i, { condition: e.target.value })}
+              />
+            </div>
           </div>
         );
       })}

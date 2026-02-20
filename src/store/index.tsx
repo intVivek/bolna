@@ -30,7 +30,14 @@ type Action =
 export type { Action };
 
 const defaultState: StoreState = {
-  nodes: [{ id: "node-1", description: "Start node", prompt: "", edges: [] }],
+  nodes: [
+    {
+      id: "node-1",
+      description: "Start node",
+      prompt: "Start Workflow",
+      edges: [],
+    },
+  ],
   selectedIndex: 0,
 };
 

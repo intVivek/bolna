@@ -23,7 +23,7 @@ export default function FlowChart() {
     const id = generateId(state.nodes);
     dispatch({
       type: "ADD_NODE",
-      payload: { id, description: id, prompt: "", edges: [] },
+      payload: { id, description: id, prompt: "Workflow Node", edges: [] },
     });
   }
 

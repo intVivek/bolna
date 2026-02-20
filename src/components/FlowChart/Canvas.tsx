@@ -19,15 +19,17 @@ import {
 import "@xyflow/react/dist/style.css";
 import { useStore, type Node as StoreNode } from "@/store";
 import FlowNode from "./FlowNode";
+import FlowEdge from "./FlowEdge";
 import ConnectionLine from "./ConnectionLine";
 import { validateNodes, validateWarnings } from "@/lib/validate";
 
 const nodeTypes = { flowNode: FlowNode };
+const edgeTypes = { flowEdge: FlowEdge };
 
 const EDGE_COLOR = "#6b7280";
 
 const defaultEdgeOptions = {
-  type: "smoothstep",
+  type: "flowEdge",
   style: { stroke: EDGE_COLOR, strokeWidth: 0.75 },
   markerEnd: { type: MarkerType.ArrowClosed, color: EDGE_COLOR },
 };
@@ -177,6 +179,7 @@ function CanvasInner() {
         nodes={rfNodes}
         edges={rfEdges}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         connectionLineComponent={ConnectionLine}
         isValidConnection={isValidConnection}

@@ -35,7 +35,7 @@ export default function CodePreview() {
       <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
         JSON
       </div>
-      <div className="h-max max-h-[300px] w-full mt-2 flex flex-col text-sm border rounded-lg overflow-hidden relative group">
+      <div className="h-max max-h-[300px] w-full mt-2 flex flex-col text-sm border rounded-lg overflow-hidden relative group bg-[#f8f8f8]">
         <div
           className="absolute top-2 right-2 z-10 h-8 w-8 flex items-center justify-center border rounded-md cursor-pointer bg-background"
           onClick={handleCopy}
